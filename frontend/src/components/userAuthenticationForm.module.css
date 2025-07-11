@@ -1,0 +1,5 @@
+.alertMsg {
+    max-width: 50%;
+    display: flex;
+    justify-self: center;
+}
