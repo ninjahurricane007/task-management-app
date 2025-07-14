@@ -22,7 +22,7 @@ export default function CreateTask() {
     const onSubmit = async (data: taskFormInputs) => {
         const response = await api.post('/tasks', data)
         if(response.data){
-            router.push('http://localhost:3001/tasks')
+            router.push('/tasks')
         }
     }
 
