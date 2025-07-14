@@ -11,11 +11,11 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor()); //to remove user information while returning a task
 
   app.enableCors({
-    origin: 'http://localhost:3001', //  allow Next.js frontend
+    origin: '*', //  allow Next.js frontend
     credentials: true, // if you're using cookies or auth headers
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT || 3000);
   logger.log('Application is running on port 3000');
 }
 bootstrap();
