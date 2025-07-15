@@ -151,7 +151,7 @@ export default function TasksPage() {
         sx={{ px: 3, mb: 5 }}
       >
         {tasks.map((task) => (
-          <Grid size={{ xs: 1, sm: 2, md: 3 }} key={task.id}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={task.id}>
             <TaskCard
               id={task.id}
               title={task.title}
