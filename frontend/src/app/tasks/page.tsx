@@ -128,41 +128,41 @@ export default function TasksPage() {
           variant="contained"
           onClick={() => setToggleDrawer(true)}
           sx={{ width: "9rem" }}
+          disabled={tasks.length == 0}
         >
           Filters
         </Button>
       </Box>
 
-      <Box display="flex" alignItems="center" sx={{ ml: 3, mb: 1 }}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={displayAllCheckBoxes}
-              onChange={handleSelectAllChange}
+      {tasks.length > 0 ? (
+        <>
+          <Box display="flex" alignItems="center" sx={{ ml: 3, mb: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={displayAllCheckBoxes}
+                  onChange={handleSelectAllChange}
+                />
+              }
+              label="Select All Tasks"
             />
-          }
-          label="Select All Tasks"
-        />
-      </Box>
-
-      <Grid
-        container
-        spacing={3}
-        sx={{ px: 3, mb: 5 }}
-      >
-        {tasks.map((task) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={task.id}>
-            <TaskCard
-              id={task.id}
-              title={task.title}
-              description={task.description}
-              status={task.status}
-              select={displayAllCheckBoxes}
-              setSelectedTasks={setSelectedTasks}
-            />
+          </Box>
+          <Grid container spacing={3} sx={{ px: 3, mb: 5 }}>
+            {tasks.map((task) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={task.id}>
+                <TaskCard
+                  id={task.id}
+                  title={task.title}
+                  description={task.description}
+                  status={task.status}
+                  select={displayAllCheckBoxes}
+                  setSelectedTasks={setSelectedTasks}
+                />
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+        </>
+      ) : <Typography variant="h5" style={{marginTop: '10%'}}>Create a task to start</Typography>}
 
       <FilterDrawer
         open={toggleDrawer}

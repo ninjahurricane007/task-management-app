@@ -12,7 +12,6 @@ export default function SignUp() {
   const { isLogin, hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    console.log("hyd", hasHydrated, "log", isLogin);
     if (hasHydrated && isLogin) {
       router.replace("/tasks"); // stay in the home page, if user clicks back button from home page unless user log out
     }

@@ -46,6 +46,7 @@ export default function UserAuthenticationForm({
       if (result.data.accessToken && result.data.refreshToken) {
         localStorage.setItem("accessToken", result.data.accessToken);
         localStorage.setItem("refreshToken", result.data.refreshToken);
+        localStorage.setItem("userName", result.data.userName);
         login();
       }
       console.log("result", result);
@@ -83,7 +84,7 @@ export default function UserAuthenticationForm({
         <TextField
           {...register("username", { required: "Username is required" })}
           type="text"
-          placeholder="Enter Email"
+          placeholder="Enter Username"
         ></TextField>
         <br></br>
         <br></br>

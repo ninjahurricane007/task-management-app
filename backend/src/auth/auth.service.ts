@@ -52,14 +52,14 @@ export class AuthService {
 
   async signIn(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string; userName: string }> {
     const { username, password } = authCredentialsDto;
     const user = await this.usersRepository.findOne({ where: { username } });
     if (user && (await bcrypt.compare(password, user.password))) {
       const payload: JwtPayload = { username };
       const accessToken: string = this.jwtService.sign(payload);
       const refreshToken = this.jwtService.sign(payload, { expiresIn: '1d' });
-      return { accessToken, refreshToken };
+      return { accessToken, refreshToken, userName: username };
     } else {
       throw new UnauthorizedException('Invalid Credentials');
     }
