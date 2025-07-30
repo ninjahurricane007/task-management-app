@@ -18,12 +18,17 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../auth/user.entity';
 import { Logger } from '@nestjs/common';
+import { TaskAIService } from './tasks-ai.service';
+import { GenerateTaskFromPromptDto } from './dto/generate-task-from-prompt.dto';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
   private logger = new Logger('TaskController');
-  constructor(private taskService: TasksService) {}
+  constructor(
+    private taskService: TasksService,
+    private taskAIService: TaskAIService,
+  ) {}
 
   @Get()
   getTasks(
@@ -62,5 +67,14 @@ export class TasksController {
   ): Promise<Task> {
     const { status } = updateTaskStatusDto;
     return this.taskService.updateTaskStatus(id, status, user);
+  }
+
+  @Post('generate-from-prompt')
+  GenerateTaskFromPrompt(
+    @Body() generateTaskFromPromptDto: GenerateTaskFromPromptDto,
+  ): Promise<{ title: string; description: string }> {
+    return this.taskAIService.generateTaskFromPrompt(
+      generateTaskFromPromptDto.prompt,
+    );
   }
 }

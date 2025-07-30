@@ -106,6 +106,7 @@ export default function TaskDetails() {
     <div className={styles.taskDetails}>
       <h3>{task?.title}</h3>
       <p>{task?.description}</p>
+      <br></br>
       <FormControl variant="outlined">
         <InputLabel id="status-label">Status</InputLabel>
         <Select

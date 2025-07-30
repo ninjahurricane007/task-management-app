@@ -15,6 +15,7 @@ import api from "@/lib/api";
 import TaskCard from "@/components/taskCard";
 import FilterDrawer from "@/components/filterDrawer";
 import AlertModal from "@/components/alertModal";
+import PromptBar from "@/components/promptBar";
 
 enum TaskStatus {
   OPEN = "OPEN",
@@ -147,7 +148,7 @@ export default function TasksPage() {
               label="Select All Tasks"
             />
           </Box>
-          <Grid container spacing={3} sx={{ px: 3, mb: 5 }}>
+          <Grid container spacing={3} sx={{ px: 3, mb: 12 }}>
             {tasks.map((task) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={task.id}>
                 <TaskCard
@@ -163,6 +164,8 @@ export default function TasksPage() {
           </Grid>
         </>
       ) : <Typography variant="h5" style={{marginTop: '10%'}}>Create a task to start</Typography>}
+
+      <PromptBar refreshPage={fetchAllTasks}/>
 
       <FilterDrawer
         open={toggleDrawer}

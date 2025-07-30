@@ -94,7 +94,7 @@ export default function NavBar() {
                     "aria-labelledby": "basic-button",
                   },
                 }}
-                style={{ marginTop: 14 }}
+                style={{ marginTop: 7 }}
               >
                 <MenuItem onClick={handleMenuClose}>Hi {userName} !</MenuItem>
                 <MenuItem onClick={handleMenuClose}>Change Password</MenuItem>
