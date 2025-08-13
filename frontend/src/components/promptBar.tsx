@@ -1,41 +1,74 @@
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import CircularProgress from "@mui/material/CircularProgress";
 import api from "@/lib/api";
 
-type promptBarProps = {
-  refreshPage: () => void
-}
+type TaskData = {
+  title: string;
+  description: string;
+};
 
-export default function PromptBar({refreshPage}: promptBarProps) {
-  const placeholderValues = ["Type your prompt to generate task", "Eg: Create a task for implementing login functionality", "Eg: Watch cricket match at 7:00 pm"]
+type PromptBarProps = {
+  refreshPage: () => void;
+  allTasks: TaskData[];
+};
+
+export default function PromptBar({ refreshPage, allTasks }: PromptBarProps) {
+  console.log("allTasks", allTasks);
+  const placeholderValues = [
+    "Type your prompt to generate task",
+    "Eg: Create a task for implementing login functionality",
+    "Eg: Watch cricket match at 7:00 pm",
+  ];
   const [prompt, setPrompt] = useState<string>("");
-  const [index, setIndex] = useState(0)
-  const [placeholder, setPlaceholder] = useState<string>(placeholderValues[0])
+  const [index, setIndex] = useState(0);
+  const [placeholder, setPlaceholder] = useState<string>(placeholderValues[0]);
+  const [showProgressIcon, setShowProgressIcon] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
       if (index === placeholderValues.length) {
-        setIndex(0)
-        setPlaceholder(placeholderValues[0])
+        setIndex(0);
+        setPlaceholder(placeholderValues[0]);
       } else {
-        setIndex(index+1)
-        setPlaceholder(placeholderValues[index])
+        setIndex(index + 1);
+        setPlaceholder(placeholderValues[index]);
       }
-    }, 3000)
-  })
+    }, 3000);
+  });
 
   const handleGenerateTask = async (prompt: string) => {
     try {
+      setShowProgressIcon(true);
       const { data } = await api.post("/tasks/generate-from-prompt", {
         prompt,
       });
-      await api.post("/tasks", {
-        title: data.title,
-        description: data.description,
-      });
-      refreshPage()
-      setPrompt("")
+
+      const similarityResults = await Promise.all(
+        allTasks.map((task) =>
+          api.post("/tasks/check-similarity", {
+            text1: task.title,
+            text2: data.title,
+          })
+        )
+      );
+
+      const similarities = similarityResults.map((res) => res.data);
+      const maxSimilarity = Math.max(...similarities);
+
+      if (maxSimilarity > 0.8) {
+        console.log("A similar task already exists");
+      } else {
+        await api.post("/tasks", {
+          title: data.title,
+          description: data.description,
+        });
+        refreshPage();
+      }
+
+      setShowProgressIcon(false);
+      setPrompt("");
     } catch (error) {
       console.error("Failed to generate task:", error);
     }
@@ -71,11 +104,23 @@ export default function PromptBar({refreshPage}: promptBarProps) {
           placeholder={placeholder}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (prompt) {
+                handleGenerateTask(prompt);
+              }
+            }
+          }}
           fullWidth
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <AutoFixHighIcon sx={{ opacity: "75%" }} />
+                {showProgressIcon ? (
+                  <CircularProgress color="inherit" size="1.25rem" />
+                ) : (
+                  <AutoFixHighIcon sx={{ opacity: "75%" }} />
+                )}
               </InputAdornment>
             ),
             sx: {

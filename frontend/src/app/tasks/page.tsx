@@ -165,7 +165,7 @@ export default function TasksPage() {
         </>
       ) : <Typography variant="h5" style={{marginTop: '10%'}}>Create a task to start</Typography>}
 
-      <PromptBar refreshPage={fetchAllTasks}/>
+      <PromptBar refreshPage={fetchAllTasks} allTasks={tasks}/>
 
       <FilterDrawer
         open={toggleDrawer}

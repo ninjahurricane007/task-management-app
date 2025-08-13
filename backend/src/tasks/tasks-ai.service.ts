@@ -3,10 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable prettier/prettier */
+
 import { Injectable } from '@nestjs/common';
 import { ChatOpenAI } from '@langchain/openai';
-
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { CheckSimilarityDto } from './dto/check-similarity-dto';
 @Injectable()
 export class TaskAIService {
   model = new ChatOpenAI({
@@ -51,5 +52,30 @@ Do not add anything else.`;
       title: match[1].trim(),
       description: match[2].trim(),
     };
+  }
+
+  private async textToEmbeddings(text: string): Promise<number[]> {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "embedding-001" });
+
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  }
+
+  private cosineSimilarity(vecA: number[], vecB: number[]): number {
+    const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
+    const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val * val, 0));
+    const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val * val, 0));
+
+    if (magnitudeA === 0 || magnitudeB === 0) return 0;
+    return dotProduct / (magnitudeA * magnitudeB);
+  }
+
+  async checkSimilarity(similarityDto: CheckSimilarityDto): Promise<number> {
+    const {text1, text2} = similarityDto
+    const embedding1 = await this.textToEmbeddings(text1);
+    const embedding2 = await this.textToEmbeddings(text2);
+
+    return this.cosineSimilarity(embedding1, embedding2);
   }
 }
