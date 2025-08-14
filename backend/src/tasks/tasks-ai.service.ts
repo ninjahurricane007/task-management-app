@@ -8,6 +8,7 @@ import { Injectable } from '@nestjs/common';
 import { ChatOpenAI } from '@langchain/openai';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { CheckSimilarityDto } from './dto/check-similarity-dto';
+import { GenerateAndCheckTaskDto } from './dto/generate-and-check-task-dto';
 @Injectable()
 export class TaskAIService {
   model = new ChatOpenAI({
@@ -71,11 +72,38 @@ Do not add anything else.`;
     return dotProduct / (magnitudeA * magnitudeB);
   }
 
-  async checkSimilarity(similarityDto: CheckSimilarityDto): Promise<number> {
-    const {text1, text2} = similarityDto
-    const embedding1 = await this.textToEmbeddings(text1);
-    const embedding2 = await this.textToEmbeddings(text2);
+  private async checkSimilarity(checkSimilarityDto: CheckSimilarityDto): Promise<number> {
+    const { embeddedText, plainText } = checkSimilarityDto
+    const embedding1 = embeddedText;
+    const embedding2 = await this.textToEmbeddings(plainText);
 
     return this.cosineSimilarity(embedding1, embedding2);
+  }
+
+  async generateAndCheckTask(generateAndCheckTaskDto: GenerateAndCheckTaskDto): Promise<{
+    task: { title: string; description: string };
+    shouldCreate: boolean;
+  }> {
+    const { prompt, allTasks } = generateAndCheckTaskDto
+
+    const generatedTask = await this.generateTaskFromPrompt(prompt);
+
+    const embeddedText = await this.textToEmbeddings(generatedTask.title);
+
+    const similarities = await Promise.all(
+      allTasks.map((task) =>
+        this.checkSimilarity({
+          embeddedText,
+          plainText: task.title,
+        })
+      )
+    );
+
+    const maxSimilarity = Math.max(...similarities);
+
+    return {
+      task: generatedTask,
+      shouldCreate: maxSimilarity <= 0.8
+    };
   }
 }

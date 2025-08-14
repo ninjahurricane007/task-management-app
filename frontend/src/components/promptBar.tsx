@@ -15,7 +15,6 @@ type PromptBarProps = {
 };
 
 export default function PromptBar({ refreshPage, allTasks }: PromptBarProps) {
-  console.log("allTasks", allTasks);
   const placeholderValues = [
     "Type your prompt to generate task",
     "Eg: Create a task for implementing login functionality",
@@ -39,40 +38,28 @@ export default function PromptBar({ refreshPage, allTasks }: PromptBarProps) {
   });
 
   const handleGenerateTask = async (prompt: string) => {
-    try {
-      setShowProgressIcon(true);
-      const { data } = await api.post("/tasks/generate-from-prompt", {
-        prompt,
+  try {
+    setShowProgressIcon(true);
+    
+    const { data } = await api.post("/tasks/generate-and-check", { prompt, allTasks });
+    
+    if (data.shouldCreate) {
+      await api.post("/tasks", {
+        title: data.task.title,
+        description: data.task.description,
       });
-
-      const similarityResults = await Promise.all(
-        allTasks.map((task) =>
-          api.post("/tasks/check-similarity", {
-            text1: task.title,
-            text2: data.title,
-          })
-        )
-      );
-
-      const similarities = similarityResults.map((res) => res.data);
-      const maxSimilarity = Math.max(...similarities);
-
-      if (maxSimilarity > 0.8) {
-        console.log("A similar task already exists");
-      } else {
-        await api.post("/tasks", {
-          title: data.title,
-          description: data.description,
-        });
-        refreshPage();
-      }
-
-      setShowProgressIcon(false);
-      setPrompt("");
-    } catch (error) {
-      console.error("Failed to generate task:", error);
+      refreshPage();
+    } else {
+      console.log("A similar task already exists");
     }
-  };
+    
+    setPrompt("");
+  } catch (error) {
+    console.error("Failed to generate task:", error);
+  } finally {
+    setShowProgressIcon(false);
+  }
+};
 
   return (
     <Box

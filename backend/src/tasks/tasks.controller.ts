@@ -13,14 +13,13 @@ import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
-import { CheckSimilarityDto } from './dto/check-similarity-dto';
 import { Task } from './tasks.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../auth/user.entity';
 import { Logger } from '@nestjs/common';
 import { TaskAIService } from './tasks-ai.service';
-import { GenerateTaskFromPromptDto } from './dto/generate-task-from-prompt.dto';
+import { GenerateAndCheckTaskDto } from './dto/generate-and-check-task-dto';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
@@ -70,19 +69,13 @@ export class TasksController {
     return this.taskService.updateTaskStatus(id, status, user);
   }
 
-  @Post('generate-from-prompt')
-  GenerateTaskFromPrompt(
-    @Body() generateTaskFromPromptDto: GenerateTaskFromPromptDto,
-  ): Promise<{ title: string; description: string }> {
-    return this.taskAIService.generateTaskFromPrompt(
-      generateTaskFromPromptDto.prompt,
-    );
-  }
-
-  @Post('check-similarity')
-  checkSimilarity(
-    @Body() checkSimilarityDto: CheckSimilarityDto,
-  ): Promise<number> {
-    return this.taskAIService.checkSimilarity(checkSimilarityDto);
+  @Post('generate-and-check')
+  generateAndCheckTask(
+    @Body() generateAndCheckTaskDto: GenerateAndCheckTaskDto,
+  ): Promise<{
+    task: { title: string; description: string };
+    shouldCreate: boolean;
+  }> {
+    return this.taskAIService.generateAndCheckTask(generateAndCheckTaskDto);
   }
 }
